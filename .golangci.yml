@@ -1,0 +1,41 @@
+# golangci-lint configuration enforcing the standards in docs/STANDARDS.md.
+# Run locally with: make lint  (or: golangci-lint run)
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  # Start from the default set (errcheck, gosimple, govet, ineffassign,
+  # staticcheck, unused) and add the ones that enforce our standards.
+  enable:
+    - gofmt        # canonical formatting (STANDARDS 9)
+    - goimports    # import grouping/ordering
+    - misspell     # catch typos in comments/strings
+    - revive       # style incl. exported doc comments (STANDARDS 9)
+    - unconvert    # remove redundant conversions
+    - gocritic     # assorted correctness/style checks
+    - errorlint    # correct error wrapping/comparison (STANDARDS 4)
+    - bodyclose
+
+linters-settings:
+  gocritic:
+    disabled-checks:
+      - ifElseChain
+  revive:
+    rules:
+      - name: exported
+      - name: package-comments
+      - name: context-as-argument   # ctx must be the first parameter (STANDARDS 2)
+      - name: error-strings
+      - name: unreachable-code
+
+issues:
+  # Do not hide multiple reports of the same issue.
+  max-same-issues: 0
+  max-issues-per-linter: 0
+  exclude-rules:
+    # Test files may be less strict about exported-symbol documentation.
+    - path: _test\.go
+      linters:
+        - revive

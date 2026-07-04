@@ -1,0 +1,36 @@
+[Unit]
+Description=webblock website/IP blocking daemon
+Documentation=""
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/webblockd --socket /run/webblock.sock --store /var/lib/webblock
+Restart=on-failure
+RestartSec=2
+
+# The daemon must manage nftables/iptables, which requires CAP_NET_ADMIN.
+# It runs as root; these directives constrain what that root process can do.
+AmbientCapabilities=CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW CAP_DAC_OVERRIDE CAP_CHOWN CAP_FOWNER
+
+# Persisted blocklists live here (created + chowned by systemd).
+StateDirectory=webblock
+StateDirectoryMode=0700
+# The Unix socket lives in /run.
+RuntimeDirectory=webblock
+
+# Hardening.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/webblock /run
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+
+[Install]
+WantedBy=multi-user.target
